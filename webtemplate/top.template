@@ -1,0 +1,14 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="refresh" content="30"/>
+    <link rel="stylesheet" href="scoring.css" />
+</head>
+<body>
+    <h1>Scoring Engine 0.1</h1>
+    <hr>
+    <h2>Services</h2>
+    <table>

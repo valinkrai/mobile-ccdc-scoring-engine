@@ -1,0 +1,3 @@
+6,Cyberlab Access,0,2,drop-flag.pdf
+7,Asset Inventory and Assessment,0,13,asset-inventory.pdf
+8,Configure NTP,0,20,ntp-inject.pdf

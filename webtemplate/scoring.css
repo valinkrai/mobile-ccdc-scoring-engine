@@ -1,0 +1,17 @@
+.label{
+    font-weight: bold;
+}
+.down{
+    content: "Down";
+    text-align: center;
+    width: 150px;
+    color: white;
+    background-color: red;
+}
+.up{
+    content: "Up";
+    text-align: center;
+    width: 150px;
+    color: white;
+    background-color: green;
+}
