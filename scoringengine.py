@@ -101,9 +101,9 @@ def test_services(injects):
     update_html(tests, injects)
 
 def update_html(tests, injects):
-
+    inject_offset = datetime.timedelta(hours=0, minutes=-4)
     html_location = "/var/www/html/index.html"
-
+    
     with open('webtemplate/top.template', 'r', encoding='utf8') as myfile:
         top=myfile.read()
     with open('webtemplate/bottom.template', 'r', encoding='utf8') as myfile:
@@ -111,7 +111,7 @@ def update_html(tests, injects):
 
     generic_line = '        <tr><td class="label">%s</td><td class="%s">%s</td></tr>\n'
     generic_inject = '    <p><b>Inject %s: </b><a href="%s" target="_blank">%s</a> - %s</p>'
-    dynamic_lines = "<h2>%s</h2>" % datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    dynamic_lines = "<h2>%s</h2>" % datetime.datetime.now().strftime('%Y-%m-%d %I:%M:%S %p')
 
     for test in tests:
         dynamic_lines += generic_line % (test.name, test.status, test.status.capitalize())
@@ -120,10 +120,10 @@ def update_html(tests, injects):
     dynamic_lines+="    <h2>Injects</h2>"
     
     for inject in injects:
-        inject_time = start_time + inject.timedelta
+        inject_time = start_time + inject.timedelta + inject_offset
 
         if datetime.datetime.now() > inject_time:
-            inject_time_string = inject_time.strftime('%H:%M:%S')
+            inject_time_string = inject_time.strftime('%I:%M:%S %p')
             dynamic_lines += generic_inject % (inject.number, inject.filename, inject.name, inject_time_string)
 
     html = top + dynamic_lines + bottom

@@ -8,10 +8,24 @@ print(sys.version)
 # This is used to populatate a directory with hashes of portions of all emails in specified accounts on a pop3 server to test against later.
 
 
+if len(sys.argv) == 2:
+
+
+    if int(sys.argv[1]) > 0 and int(sys.argv[1]) < 30:
+        team_number = int(sys.argv[1])
+        base_third_octet = 20
+        third_octet = base_third_octet + team_number
+
+else:
+    print("script should be run like: \"scoringengine.py new|old $teamnumber\"")
+    print("ex) scoringengine.py old 3")
+
 credentials = {}
 accountsfile = "accounts.txt"
-pop3_server = "172.25.21.39"
+pop3_server = "172.25.%s.39" % third_octet
 pop3_port = "110"
+
+
 
 with open(accountsfile) as f:
     for line in f:
