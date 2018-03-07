@@ -1,5 +1,5 @@
 results = ""
-# pip3 install dnspython termcolor requests
+# pip3 install dnspython termcolor requests python-dateutil
 import os
 import random
 import requests
