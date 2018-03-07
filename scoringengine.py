@@ -407,7 +407,7 @@ def addns_test():
         return Score(test_name, False)
 
 
-if len(sys.argv) == 2:
+if len(sys.argv) == 3:
     if sys.argv[1] == "new":
         start_time = datetime.datetime.now()
     elif sys.argv[1] == "old":
