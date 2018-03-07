@@ -12,6 +12,7 @@ import hashlib
 import time
 from termcolor import colored
 import datetime
+import sys
 
 class Score(object):
     def __init__(self, service_name, status, error="No fail reason available."):
@@ -33,7 +34,7 @@ class Inject(object):
 def get_injects():
     injects_file = "wildcardinjects.txt"
     injects = []
-    with open(injects_file) as f:
+    with open(injects_file, mode='r', encoding='utf8') as f:
         for line in f:
             (number, name, hours, minutes, filename) = line.split(",")
             injects.append(Inject(number, name, hours, minutes, filename))
@@ -55,7 +56,7 @@ def change_ip():
         ip = random_ip()
     
     os.system('ifdown %s' % (scoring_interface))
-    os.system('sed -ri "s/IPADDR=10(\.[0-2]{0,1}[0-9]{1,2}){3}/IPADDR=%s/" /etc/sysconfig/network-scripts/ifcfg-%s' % (ip, scoring_interface))
+    os.system(r'sed -ri "s/IPADDR=10(\.[0-2]{0,1}[0-9]{1,2}){3}/IPADDR=%s/" /etc/sysconfig/network-scripts/ifcfg-%s' % (ip, scoring_interface))
     os.system('ifup %s' % (scoring_interface))
 
     print(ip)
@@ -103,13 +104,13 @@ def update_html(tests, injects):
 
     html_location = "/var/www/html/index.html"
 
-    with open('webtemplate/top.template', 'r') as myfile:
+    with open('webtemplate/top.template', 'r', encoding='utf8') as myfile:
         top=myfile.read()
-    with open('webtemplate/bottom.template', 'r') as myfile:
+    with open('webtemplate/bottom.template', 'r', encoding='utf8') as myfile:
         bottom=myfile.read()
 
     generic_line = '        <tr><td class="label">%s</td><td class="%s">%s</td></tr>\n'
-    generic_inject = '    <p><b>Inject %s: </b><a href="%s" target="_blank">%s</a></p>'
+    generic_inject = '    <p><b>Inject %s: </b><a href="%s" target="_blank">%s</a> - %s</p>'
     dynamic_lines = "<h2>%s</h2>" % datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     for test in tests:
@@ -122,7 +123,8 @@ def update_html(tests, injects):
         inject_time = start_time + inject.timedelta
 
         if datetime.datetime.now() > inject_time:
-            dynamic_lines += generic_inject % (inject.number, inject.filename, inject.name)
+            inject_time_string = inject_time.strftime('%H:%M:%S')
+            dynamic_lines += generic_inject % (inject.number, inject.filename, inject.name, inject_time_string)
 
     html = top + dynamic_lines + bottom
     
@@ -134,7 +136,7 @@ def update_html(tests, injects):
 
 def get_credentials(credentials_file):
     credentials = {}
-    with open(credentials_file) as f:
+    with open(credentials_file, mode='r', encoding='utf8') as f:
         for line in f:
             (username, password) = line.split(":")
             credentials[username] = password.replace('\n', '')
@@ -150,7 +152,7 @@ def filter_nonprintable(text):
 def pop3_test():
     test_name = 'POP3'
     test_credentials = get_credentials('accounts.txt')
-    test_server = "172.25.21.39"
+    test_server = "172.25.%s.39" % third_octet
     test_port = "110"
 
     username, password = random.choice(list(test_credentials.items()))
@@ -159,7 +161,7 @@ def pop3_test():
     test_mail_number = random.randint(1,number_files)
     test_mail_file = "emails/" + username + "/" + str(test_mail_number)
    
-    with open(test_mail_file, 'r') as reffile:
+    with open(test_mail_file, 'r', encoding='utf8') as reffile:
         test_mail_reference_hash = reffile.read().replace('\n', '')
 
 
@@ -188,7 +190,7 @@ def pop3_test():
 
 def smtp_test():
     test_name = "SMTP"
-    test_server = "172.25.21.39"
+    test_server = "172.25.%s.39" % third_octet
     # Import smtplib for the actual sending function
    
     #Clean this code up lmao, lazy tho
@@ -207,7 +209,7 @@ def smtp_test():
         smtp = smtplib.SMTP()
         smtp.connect(test_server)
     except Exception as e:
-        status = colored('Down', 'red')
+        return Score(test_name, False)
     #try:
     #    smtp.login('rwilson','tree22')
     #except Exception:
@@ -221,7 +223,7 @@ def smtp_test():
 
 def webmail_test():
     test_name = "Mail - HTTP"
-    test_server = "172.25.21.39"
+    test_server = "172.25.%s.39" % third_octet
     test_type = "http" 
     score = Score(test_name, True)
     test_uris = (
@@ -259,7 +261,7 @@ def webmail_test():
 
 def http_test():
     test_name = "Ecom - HTTP"
-    test_server = "172.25.21.11"
+    test_server = "172.25.%s.11" % third_octet
     test_type = "http" 
     score = Score(test_name, True)
     test_uris = (
@@ -299,7 +301,7 @@ def http_test():
 
 def https_test():
     test_name = "Ecom - HTTPS"
-    test_server = "172.25.21.11"
+    test_server = "172.25.%s.11" % third_octet
     test_type = "https" 
     score = Score(test_name, True)
     test_uris = (
@@ -337,9 +339,13 @@ def https_test():
         return Score(test_name, False)
 
 def ubuntu_test():
-    test_ips = ('172.25.21.39','172.25.21.23','172.25.21.11')
-    test_records = ('mail.team.local','dns.team.local','www.team.local')
-    test_server = "172.25.21.23"
+    test_ips = ('172.25.%s.39' % third_octet,
+                '172.25.%s.23' % third_octet,
+                '172.25.%s.11' % third_octet)
+    test_records = ('mail.team.local',
+                    'dns.team.local',
+                    'www.team.local')
+    test_server = "172.25.%s.23" % third_octet
     test_name = "DNS"
 
     ## Choose random record to text
@@ -367,9 +373,13 @@ def ubuntu_test():
         return Score(test_name, False)
 
 def addns_test():
-    test_ips = ('172.25.21.39','172.25.21.23','172.25.21.11')
-    test_records = ('mail.team.local','dns.team.local','www.team.local')
-    test_server = "172.25.21.27"
+    test_ips = ('172.25.%s.39' % third_octet,
+                '172.25.%s.23' % third_octet,
+                '172.25.%s.11' % third_octet)
+    test_records = ('mail.team.local',
+                    'dns.team.local',
+                    'www.team.local')
+    test_server = "172.25.%s.27" % third_octet
     test_name = "ADDNS"
 
     ## Choose random record to text
@@ -397,6 +407,19 @@ def addns_test():
         return Score(test_name, False)
 
 
-start_time = datetime.datetime.now()
-injects = get_injects()
-start_scoring(injects)
+if len(sys.argv) == 2:
+    if sys.argv[1] == "new":
+        start_time = datetime.datetime.now()
+    elif sys.argv[1] == "old":
+        pass
+
+    if int(sys.argv[2]) > 0 and int(sys.argv[2]) < 30:
+        team_number = int(sys.argv[2])
+        base_third_octet = 20
+        third_octet = base_third_octet + team_number
+
+    injects = get_injects()
+    start_scoring(injects)
+else:
+    print("script should be run like: \"scoringengine.py new|old $teamnumber\"")
+    print("ex) scoringengine.py old 3")
