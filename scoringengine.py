@@ -13,7 +13,7 @@ import time
 from termcolor import colored
 import datetime
 import sys
-import dateutil
+from dateutil import parser
 
 class Score(object):
     def __init__(self, service_name, status, error="No fail reason available."):
@@ -418,7 +418,7 @@ if len(sys.argv) == 3:
     elif sys.argv[1] == "old":
         with open("start_time.txt", mode='r', encoding='utf8') as time_file:
             file_time_string=time_file.read()
-           start_time = dateutil.parser.parse(file_time_string)
+            start_time = parser.parse(file_time_string)
 
 
 
