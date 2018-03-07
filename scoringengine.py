@@ -418,7 +418,7 @@ if len(sys.argv) == 3:
     elif sys.argv[1] == "old":
         with open("start_time.txt", mode='r', encoding='utf8') as time_file:
             file_time_string=time_file.read()
-            print(dateutil.parser.parse(file_time_string))
+           start_time = dateutil.parser.parse(file_time_string)
 
 
 
