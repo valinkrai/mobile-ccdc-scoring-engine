@@ -13,6 +13,7 @@ import time
 from termcolor import colored
 import datetime
 import sys
+import dateutil
 
 class Score(object):
     def __init__(self, service_name, status, error="No fail reason available."):
@@ -101,7 +102,8 @@ def test_services(injects):
     update_html(tests, injects)
 
 def update_html(tests, injects):
-    inject_offset = datetime.timedelta(hours=0, minutes=-4)
+    inject_offset = datetime.timedelta(hours=0, minutes=(-4))
+
     html_location = "/var/www/html/index.html"
     
     with open('webtemplate/top.template', 'r', encoding='utf8') as myfile:
@@ -129,7 +131,7 @@ def update_html(tests, injects):
     html = top + dynamic_lines + bottom
     
 
-    with open(html_location, 'w') as html_file:
+    with open(html_location, mode='w', encoding='utf8') as html_file:
         #text_file.write(snippet)
         html_file.write(html)
 
@@ -410,8 +412,15 @@ def addns_test():
 if len(sys.argv) == 3:
     if sys.argv[1] == "new":
         start_time = datetime.datetime.now()
+        with open("start_time.txt", mode='w', encoding='utf8') as time_file:
+            time_file.write(str(start_time))
+        
     elif sys.argv[1] == "old":
-        pass
+        with open("start_time.txt", mode='r', encoding='utf8') as time_file:
+            file_time_string=time_file.read()
+            print(dateutil.parser.parse(file_time_string))
+
+
 
     if int(sys.argv[2]) > 0 and int(sys.argv[2]) < 30:
         team_number = int(sys.argv[2])
@@ -419,6 +428,7 @@ if len(sys.argv) == 3:
         third_octet = base_third_octet + team_number
 
     injects = get_injects()
+    print(start_time)
     start_scoring(injects)
 else:
     print("script should be run like: \"scoringengine.py new|old $teamnumber\"")
